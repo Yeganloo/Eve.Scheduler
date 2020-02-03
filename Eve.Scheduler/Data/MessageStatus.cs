@@ -2,8 +2,6 @@
 {
     public enum MessageStatus : byte
     {
-        Periodic = 1,
-        Retry = 2,
-        SaveResult = 4
+        SaveResult = 1
     }
 }

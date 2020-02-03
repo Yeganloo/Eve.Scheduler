@@ -2,6 +2,8 @@
 {
     public class Message
     {
+        public string Identifier { get; set; }
+
         public string MessageType { get; set; }
         /// <summary>
         /// Unix Start Time. (Optional)
@@ -12,7 +14,9 @@
         /// </summary>
         public long? ExpiresDateTime { get; set; }
 
-        public int? Period { get; set; }
+        public int Period { get; set; }
+
+        public int Retries { get; set; }
 
         public int? Timeout { get; set; }
 
