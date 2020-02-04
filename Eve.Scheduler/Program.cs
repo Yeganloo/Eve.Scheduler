@@ -1,5 +1,5 @@
 ﻿using Eve.Scheduler.Controller;
-using Eve.Scheduler.Controller.Log;
+using Eve.Scheduler.Controller.Server;
 using Eve.Settings;
 using System;
 using System.Collections.Generic;
@@ -26,7 +26,7 @@ namespace Eve.Scheduler
             {
                 logger.CreateLogger(GlobalLoggerName);
                 //TODO Read Log level from parameters.
-                logger.LogLevel = LogLevels.Debug;
+                logger.LogLevel = LogLevels.Info;
                 var sman = new SettingsManager(new ManagerSettings
                 {
                     SettingsFolder = "Settings"
@@ -34,9 +34,9 @@ namespace Eve.Scheduler
                 sman.RememberMe(typeof(Settings), "Settings");
 
                 Console.WriteLine($@"Eve scheduler version({Version}).");
-                logger.Log(GlobalLoggerName, "Scheduler just starts.", LogLevels.Debug);
+                logger.Log(GlobalLoggerName, "Scheduler just starts.", LogLevels.Info);
                 var setting = sman.GetSettings<Settings>();
-                logger.Log(GlobalLoggerName, "Settings loaded.", LogLevels.Debug);
+                logger.Log(GlobalLoggerName, "Settings loaded.", LogLevels.Journal);
 
                 //TODO load cache provider.
 
@@ -49,34 +49,40 @@ namespace Eve.Scheduler
                     {
                         return Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(msg));
                     }, sman));
-                    logger.Log(GlobalLoggerName, $"{handle.Type} handler is loaded.", LogLevels.Debug);
+                    logger.Log(GlobalLoggerName, $"{handle.Type} handler is loaded.", LogLevels.Info);
                 }
-
-                //TODO Load socket listenner.
-
-                string Command;
-                while (running)
+                using (var socket = new SocketController(logger, handlers))
                 {
-                    Command = Read();
-                    switch (Command.ToLower())
+                    //TODO Load socket listenner.
+                    foreach (var ss in setting.SocketSettings)
                     {
-                        case "exit":
-                            running = false;
-                            break;
-                        case "test":
-                            handlers["test"].Handle(new Message
-                            {
-                                Identifier = "001",
-                                MessageType = "test",
-                                Payload = new byte[0],
-                                Status = (byte)MessageStatus.SaveResult,
-                                Timeout = 1500,
-                                Retries = 2
-                            }, 2);
-                            break;
-                        default:
-                            Console.WriteLine("Read Help!");
-                            break;
+                        socket.Add(ss);
+                    }
+
+                    string Command;
+                    while (running)
+                    {
+                        Command = Read();
+                        switch (Command.ToLower())
+                        {
+                            case "exit":
+                                running = false;
+                                break;
+                            case "test":
+                                handlers["test"].Handle(new Message
+                                {
+                                    Identifier = "001",
+                                    MessageType = "test",
+                                    Payload = new byte[0],
+                                    Status = (byte)MessageStatus.SaveResult,
+                                    Timeout = 1500,
+                                    Retries = 2
+                                }, 2);
+                                break;
+                            default:
+                                Console.WriteLine("Read Help!");
+                                break;
+                        }
                     }
                 }
             }

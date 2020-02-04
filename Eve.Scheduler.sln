@@ -3,7 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29728.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eve.Scheduler", "Eve.Scheduler/Eve.Scheduler.csproj", "{91A1D4AF-89F6-475D-A61E-59E166AAE746}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eve.Scheduler", "Eve.Scheduler\Eve.Scheduler.csproj", "{91A1D4AF-89F6-475D-A61E-59E166AAE746}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{90BF7A91-2104-4A4A-9B02-225812D26EE2}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
