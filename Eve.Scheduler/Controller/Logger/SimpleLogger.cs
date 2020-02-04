@@ -9,21 +9,23 @@ namespace Eve.Scheduler.Controller
         private string BaseAddress;
         private Dictionary<string, Stream> Writers;
         private ILogProvider logProvider;
+        private FileMode _FileMode;
 
         public LogLevels LogLevel { get; set; }
 
-        public SimpleLogger(string logFolder, ILogProvider logProvider)
+        public SimpleLogger(string logFolder, ILogProvider logProvider, FileMode fileMode = FileMode.Append)
         {
             BaseAddress = logFolder;
             if (!Directory.Exists(BaseAddress))
                 Directory.CreateDirectory(BaseAddress);
             Writers = new Dictionary<string, Stream>();
             this.logProvider = logProvider;
+            _FileMode = fileMode;
         }
 
         public void CreateLogger(string name)
         {
-            var str = File.Open($"{BaseAddress}{Path.DirectorySeparatorChar}{name}.{logProvider.Extention}", FileMode.Create, FileAccess.Write, FileShare.Read);
+            var str = File.Open($"{BaseAddress}{Path.DirectorySeparatorChar}{name}.{logProvider.Extention}", _FileMode, FileAccess.Write, FileShare.Read);
             logProvider.Init(str);
             Writers.Add(name, str);
         }

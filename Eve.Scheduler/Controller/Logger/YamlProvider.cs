@@ -24,8 +24,6 @@ namespace Eve.Scheduler.Controller
         }
         public void Init(Stream stream)
         {
-            stream.Write(Encoding.UTF8.GetBytes("Logs:"));
-            stream.Flush();
         }
 
 
