@@ -30,7 +30,6 @@ namespace Eve.Scheduler.Controller.Server
             _SocketsSettings.Add(settings.Name, settings);
             _Servers.Add(server);
             server.OnDataReceived += Server_OnDataReceived;
-            _Logger.CreateLogger(settings.Name);
             server.StartAsync();
         }
 
@@ -43,7 +42,7 @@ namespace Eve.Scheduler.Controller.Server
                 var settings = _SocketsSettings[e.Receiver];
                 if (settings.WhiteList.Contains(message.MessageType))
                 {
-                    _Handlers[message.MessageType].Handle(message, message.Retries);
+                    _Handlers[message.MessageType].Handle(message, message.Retries - 1);
                 }
             }
             catch (Exception ex)
@@ -54,7 +53,7 @@ namespace Eve.Scheduler.Controller.Server
 
         public void Dispose()
         {
-            foreach(var server in _Servers)
+            foreach (var server in _Servers)
             {
                 server.Dispose();
             }

@@ -1,4 +1,5 @@
 ﻿using Eve.Caching;
+using Eve.Scheduler.Controller.TypeHandlers;
 using Eve.Settings;
 using System;
 using System.Collections.Concurrent;
@@ -25,11 +26,11 @@ namespace Eve.Scheduler.Controller
         }
         private Timer Checker;
         private ICacheProvider<string, Message> cache;
-        private readonly Func<SettingsManager, Message, byte[]> Handler;
+        private readonly TypeHandlerBase Handler;
+        private readonly SimpleLogger _Logger;
         public string MessageType { get; }
-        public SettingsManager SettingsManager { get; set; }
 
-        public MessageHandler(string messageType, Func<SettingsManager, Message, byte[]> handler, SettingsManager smanager, ICacheProvider<string, Message> cacheProvider = null)
+        public MessageHandler(string messageType, TypeHandlerBase handler, SimpleLogger logger, ICacheProvider<string, Message> cacheProvider = null)
         {
             cache = cacheProvider ?? new SimpleCacheProvider<Message>();
             Handler = handler;
@@ -37,7 +38,8 @@ namespace Eve.Scheduler.Controller
             Checker.AutoReset = true;
             Checker.Elapsed += Checker_Elapsed;
             MessageType = messageType;
-            SettingsManager = smanager;
+            _Logger = logger;
+            _Logger.CreateLogger(MessageType);
         }
 
         private void Checker_Elapsed(object sender, ElapsedEventArgs e)
@@ -47,6 +49,8 @@ namespace Eve.Scheduler.Controller
 
         public void Handle(Message message, int retries)
         {
+            if (string.IsNullOrEmpty(message.MessageType))
+                throw new ArgumentException("Message Type can not be null!");
             if (message.MessageType != MessageType)
                 throw new InvalidOperationException($"Can not handle a '{message.MessageType}' with a '{MessageType}' handler!");
             if (message.ExpiresDateTime.HasValue && message.ExpiresDateTime < UnixUTCNow - 1)
@@ -60,13 +64,13 @@ namespace Eve.Scheduler.Controller
                 try
                 {
                     //TODO handle timeout.
-                    var result = Handler(SettingsManager, message);
+                    var result = Handler.Handle(message);
                     if (message.Period > 0)
                         PeriodicRun(message);
                 }
                 catch (Exception e)
                 {
-                    //TODO Log exception
+                    _Logger.Log(MessageType, new { Retry = retries, Message = message, Exception = e.ToLog("Failed to handle message!") }, LogLevels.Error);
                     if (retries > 0)
                         Handle(message, retries - 1);
                 }

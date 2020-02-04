@@ -1,6 +1,7 @@
 {
   "SocketSettings": [
     {
+      "Name": "local_9090",
       "WhiteList": [],
       "Address": "127.0.0.1:9090"
     }

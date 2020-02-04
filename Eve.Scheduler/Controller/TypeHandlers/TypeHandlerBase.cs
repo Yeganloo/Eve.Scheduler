@@ -1,7 +1,4 @@
 ﻿using Eve.Settings;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Eve.Scheduler.Controller.TypeHandlers
 {
@@ -15,8 +12,6 @@ namespace Eve.Scheduler.Controller.TypeHandlers
         }
 
         public abstract byte[] Handle(Message message);
-
-
 
     }
 }

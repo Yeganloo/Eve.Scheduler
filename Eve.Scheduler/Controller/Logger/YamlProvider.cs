@@ -95,6 +95,11 @@ namespace Eve.Scheduler.Controller
 
         public byte[] GetByte(object obj)
         {
+            return GetBytes(obj);
+        }
+
+        public static byte[] GetBytes(object obj)
+        {
             StringBuilder builder = new StringBuilder($@"
 - log:
     CreateOn: {DateTime.UtcNow.ToString(timeFormat)}

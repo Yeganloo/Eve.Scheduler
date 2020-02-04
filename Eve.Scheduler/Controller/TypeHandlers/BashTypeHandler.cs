@@ -1,6 +1,5 @@
 ﻿using Eve.Settings;
 using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Eve.Scheduler.Controller.TypeHandlers
@@ -14,7 +13,8 @@ namespace Eve.Scheduler.Controller.TypeHandlers
 
         public override byte[] Handle(Message message)
         {
-            throw new NotImplementedException();
+            Console.WriteLine(Encoding.UTF8.GetString(YamlProvider.GetBytes(message)));
+            return null;
         }
     }
 }
