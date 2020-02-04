@@ -6,7 +6,7 @@ namespace Eve.Scheduler.Controller.TypeHandlers
 {
     public class BashTypeHandler : TypeHandlerBase
     {
-        public BashTypeHandler(SettingsManager settingsManager) : base(settingsManager)
+        public BashTypeHandler(string messageType, SettingsManager settingsManager) : base(messageType, settingsManager)
         {
 
         }

@@ -30,14 +30,14 @@ namespace Eve.Scheduler.Controller
         private readonly SimpleLogger _Logger;
         public string MessageType { get; }
 
-        public MessageHandler(string messageType, TypeHandlerBase handler, SimpleLogger logger, ICacheProvider<string, Message> cacheProvider = null)
+        public MessageHandler(TypeHandlerBase handler, SimpleLogger logger, ICacheProvider<string, Message> cacheProvider = null)
         {
             cache = cacheProvider ?? new SimpleCacheProvider<Message>();
             Handler = handler;
             Checker = new Timer(40000);
             Checker.AutoReset = true;
             Checker.Elapsed += Checker_Elapsed;
-            MessageType = messageType;
+            MessageType = handler.MessageType;
             _Logger = logger;
             _Logger.CreateLogger(MessageType);
         }

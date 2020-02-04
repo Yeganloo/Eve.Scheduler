@@ -44,7 +44,7 @@ namespace Eve.Scheduler
                 //TODO load handler modules.
                 foreach (var handle in setting.Handlers)
                 {
-                    handlers.Add(handle.Type, new MessageHandler(handle.Type, new BashTypeHandler(sman), logger));
+                    handlers.Add(handle.Type, new MessageHandler(new BashTypeHandler(handle.Type, sman), logger));
                     logger.Log(GlobalLoggerName, $"{handle.Type} handler is loaded.", LogLevels.Info);
                 }
                 using (var socket = new SocketController(logger, handlers))
