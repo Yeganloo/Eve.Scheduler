@@ -8,7 +8,10 @@
   ],
   "Handlers": [
     {
-      "Type": "test"
+      "MessageType": "ApiCaller",
+      "Type": "Eve.Scheduler.APICaller.APIHandler",
+      "AssemblyName": "Eve.Scheduler.APICaller.dll"
+
     }
   ]
 }

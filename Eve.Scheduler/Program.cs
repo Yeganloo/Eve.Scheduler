@@ -2,8 +2,11 @@
 using Eve.Scheduler.Controller.Server;
 using Eve.Scheduler.Controller.TypeHandlers;
 using Eve.Settings;
+using McMaster.NETCore.Plugins;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using System.Text;
 
 namespace Eve.Scheduler
@@ -22,6 +25,8 @@ namespace Eve.Scheduler
         static void Main(string[] args)
         {
             Dictionary<string, MessageHandler> handlers = new Dictionary<string, MessageHandler>();
+            var thisAssembly = typeof(Program).Assembly;
+            var _BaseAddress = $"{Path.GetDirectoryName(thisAssembly.Location)}{Path.DirectorySeparatorChar}";
             bool running = true;
             using (var logger = new SimpleLogger("logs", new YamlProvider()))
             {
@@ -42,10 +47,22 @@ namespace Eve.Scheduler
                 //TODO load cache provider.
 
                 //TODO load handler modules.
+                Assembly assembly;
+                TypeHandlerBase handler;
                 foreach (var handle in setting.Handlers)
                 {
-                    handlers.Add(handle.Type, new MessageHandler(new BashTypeHandler(handle.Type, sman), logger));
-                    logger.Log(GlobalLoggerName, $"{handle.Type} handler is loaded.", LogLevels.Info);
+                    if (!string.IsNullOrEmpty(handle.AssemblyName))
+                    {
+                        var plugin = PluginLoader.CreateFromAssemblyFile($"{_BaseAddress}{handle.AssemblyName}", sharedTypes: new[] { typeof(SettingsManager), typeof(Message), typeof(TypeHandlerBase) });
+                        assembly = plugin.LoadDefaultAssembly();
+                    }
+                    else
+                        assembly = thisAssembly;
+
+                    var type = assembly.GetType(handle.Type);
+                    handler = Activator.CreateInstance(type, new object[] { handle.MessageType, sman }) as TypeHandlerBase;
+                    handlers.Add(handle.MessageType, new MessageHandler(handler, logger));
+                    logger.Log(GlobalLoggerName, $"{handle.MessageType} handler is loaded.", LogLevels.Info);
                 }
                 using (var socket = new SocketController(logger, handlers))
                 {

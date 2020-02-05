@@ -1,6 +1,4 @@
 ﻿using System;
-using System.CodeDom;
-using System.CodeDom.Compiler;
 using System.Collections;
 using System.IO;
 using System.Text;
@@ -34,14 +32,7 @@ namespace Eve.Scheduler.Controller
 
         private static string WriteLiteralString(string input)
         {
-            using (var writer = new StringWriter())
-            {
-                using (var provider = CodeDomProvider.CreateProvider("CSharp"))
-                {
-                    provider.GenerateCodeFromExpression(new CodePrimitiveExpression(input), writer, null);
-                    return writer.ToString();
-                }
-            }
+            return input.Replace("\r", "\\r").Replace("\n", "\\n").Replace("\"", "\\\"");
         }
 
         private static void WriteObject(StringBuilder builder, object obj, string name, int indent)

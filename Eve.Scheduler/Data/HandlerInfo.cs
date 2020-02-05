@@ -7,7 +7,7 @@ namespace Eve.Scheduler.Data
     public class HandlerInfo
     {
         public string Type { get; set; }
-
-        
+        public string MessageType { get; set; }
+        public string AssemblyName { get; set; }
     }
 }
