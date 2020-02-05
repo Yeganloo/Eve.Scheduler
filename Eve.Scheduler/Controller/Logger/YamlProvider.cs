@@ -52,7 +52,7 @@ namespace Eve.Scheduler.Controller
             else if (type.IsPrimitive)
                 builder.AppendLine(obj.ToString());
             else if (obj is string)
-                builder.AppendLine(WriteLiteralString((string)obj));
+                builder.Append("\"").Append(WriteLiteralString((string)obj)).AppendLine("\"");
             else if (obj is DateTime)
                 builder.AppendLine(((DateTime)obj).ToString(timeFormat));
             else if (obj is byte[])
