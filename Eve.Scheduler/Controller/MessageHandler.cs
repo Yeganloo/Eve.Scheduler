@@ -29,6 +29,7 @@ namespace Eve.Scheduler.Controller
         private readonly TypeHandlerBase Handler;
         private readonly SimpleLogger _Logger;
         public string MessageType { get; }
+        public string HistoryFile { get; }
 
         public MessageHandler(TypeHandlerBase handler, SimpleLogger logger, ICacheProvider<string, Message> cacheProvider = null)
         {
@@ -40,6 +41,7 @@ namespace Eve.Scheduler.Controller
             MessageType = handler.MessageType;
             _Logger = logger;
             _Logger.CreateLogger(MessageType);
+            _Logger.CreateLogger(HistoryFile = $"{MessageType}_History");
         }
 
         private void Checker_Elapsed(object sender, ElapsedEventArgs e)
@@ -54,8 +56,10 @@ namespace Eve.Scheduler.Controller
             if (message.MessageType != MessageType)
                 throw new InvalidOperationException($"Can not handle a '{message.MessageType}' with a '{MessageType}' handler!");
             if (message.ExpiresDateTime.HasValue && message.ExpiresDateTime < UnixUTCNow - 1)
-                //TODO Log expired message.
+            {
+                _Logger.Log(MessageType, new { Retry = retries, Message = message, Exception = "Request Expierd!" }, LogLevels.Fatal);
                 return;
+            }
             int delay;
             if (message.StartDateTime.HasValue && (delay = (int)(message.StartDateTime - UnixUTCNow)) > 0)
                 ScheduleForLater(delay, message);
@@ -65,6 +69,8 @@ namespace Eve.Scheduler.Controller
                 {
                     //TODO handle timeout.
                     var result = Handler.Handle(message);
+                    if (!string.IsNullOrEmpty(message.Identifier))
+                    _Logger.Log(HistoryFile, new { Message = message, Result = Convert.ToBase64String(result) }, LogLevels.Force);
                     if (message.Period > 0)
                         PeriodicRun(message);
                 }
