@@ -45,7 +45,7 @@ namespace Eve.Scheduler.Controller
             }
             catch (KeyNotFoundException ex)
             {
-                throw new KeyNotFoundException("Logger not found");
+                throw new KeyNotFoundException("Logger not found", ex);
             }
         }
 

@@ -4,13 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 
 namespace Eve.Scheduler.Controller.Server
 {
     public class SocketController : IDisposable
     {
-        private const string SocketLogName = "Socket";
         private SimpleLogger _Logger;
         private IList<AsyncTcpServer> _Servers;
         private Dictionary<string, SocketSettings> _SocketsSettings;
@@ -44,10 +42,14 @@ namespace Eve.Scheduler.Controller.Server
                 {
                     _Handlers[message.MessageType].Handle(message, message.Retries - 1);
                 }
+                else
+                {
+                    _Logger.Log(e.Receiver, new { message = "Failed To handle message!", Packet = message }, LogLevels.Error);
+                }
             }
             catch (Exception ex)
             {
-                _Logger.Log($"{SocketLogName}_{e.Receiver}", ex.ToLog("Failed To Receive Message!"), LogLevels.Error);
+                _Logger.Log(e.Receiver, ex.ToLog("Failed To Receive Message!"), LogLevels.Error);
             }
         }
 
