@@ -46,44 +46,47 @@ namespace Eve.Scheduler.Controller
             //TODO get 1 or 2 recent blocks to process
         }
 
-        public void Handle(Message message, int retries)
+        public void Handle(Message message)
         {
             if (string.IsNullOrEmpty(message.MessageType))
                 throw new ArgumentException("Message Type can not be null!");
             if (message.MessageType != MessageType)
                 throw new InvalidOperationException($"Can not handle a '{message.MessageType}' with a '{MessageType}' handler!");
-            if (message.ExpiresDateTime.HasValue && message.ExpiresDateTime < UnixUTCNow - 1)
+            if (message.Options != null)
             {
-                _Logger.Log(MessageType, new { Retry = retries, Message = message, Exception = "Request Expierd!" }, LogLevels.Fatal);
-                return;
-            }
-            int delay;
-            if (message.StartDateTime.HasValue && (delay = (int)(message.StartDateTime - UnixUTCNow)) > 0)
-                ScheduleForLater(delay, message);
-            else
-            {
-                try
+                if (message.Options.ExpiresDateTime.HasValue && message.Options.ExpiresDateTime < UnixUTCNow - 1)
                 {
-                    //TODO handle timeout.
-                    var result = Handler.Handle(message);
-                    if (!string.IsNullOrEmpty(message.Identifier))
-                    _Logger.Log(HistoryFile, new { Message = message, Result = Convert.ToBase64String(result) }, LogLevels.Force);
-                    if (message.Period > 0)
-                        PeriodicRun(message);
+                    _Logger.Log(MessageType, new { Message = message, Exception = "Request Expierd!" }, LogLevels.Fatal);
+                    return;
                 }
-                catch (Exception e)
+                int delay;
+                if (message.Options.StartDateTime.HasValue && (delay = (int)(message.Options.StartDateTime - UnixUTCNow)) > 0)
                 {
-                    _Logger.Log(MessageType, new { Retry = retries, Message = message, Exception = e.ToLog("Failed to handle message!") }, LogLevels.Error);
-                    if (retries > 0)
-                        Handle(message, retries - 1);
+                    ScheduleForLater(delay, message);
+                    return;
                 }
             }
-
+            //TODO read default retries settings.
+            Handle(message, message.Options == null ? 2 : message.Options.Retries);
         }
 
-        private void PeriodicRun(Message message)
+        private void Handle(Message message, int retries)
         {
-
+            try
+            {
+                //TODO handle timeout.
+                var result = Handler.Handle(message);
+                if (!string.IsNullOrEmpty(message.Identifier))
+                    _Logger.Log(HistoryFile, new { Message = message, Result = Convert.ToBase64String(result) }, LogLevels.Force);
+                if (message.Options != null && message.Options.Period > 0)
+                    ScheduleForLater(message.Options.Period, message);
+            }
+            catch (Exception e)
+            {
+                _Logger.Log(MessageType, new { Retry = retries, Message = message, Exception = e.ToLog("Failed to handle message!") }, LogLevels.Error);
+                if (retries > 0)
+                    Handle(message, retries - 1);
+            }
         }
 
         private async Task ScheduleForLater(int delay, Message message)
@@ -94,7 +97,7 @@ namespace Eve.Scheduler.Controller
                 await Task.Run(() =>
                 {
                     Task.Delay(delay);
-                    Handle(message, message.Retries);
+                    Handle(message);
                 });
             }
             else

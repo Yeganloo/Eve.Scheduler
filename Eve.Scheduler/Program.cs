@@ -74,7 +74,7 @@ namespace Eve.Scheduler
                     while (running)
                     {
                         tokens = Read().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                        //try
+                        try
                         {
                             switch (tokens[0].ToLower())
                             {
@@ -86,9 +86,11 @@ namespace Eve.Scheduler
                                     {
                                         MessageType = tokens[1],
                                         Payload = new byte[0],
-                                        Status = (byte)MessageStatus.SaveResult,
-                                        Timeout = 1500,
-                                        Retries = 2
+                                        Options = new MessageScheduleOptions
+                                        {
+                                            Timeout = 1500,
+                                            Retries = 2
+                                        }
                                     };
                                     for (int i = 2; i < tokens.Length; i++)
                                     {
@@ -98,27 +100,27 @@ namespace Eve.Scheduler
                                                 msg.Identifier = tokens[++i];
                                                 break;
                                             case "-T":
-                                                msg.Timeout = int.Parse(tokens[++i]);
+                                                msg.Options.Timeout = int.Parse(tokens[++i]);
                                                 break;
                                             case "-p":
                                                 msg.Payload = Convert.FromBase64String(tokens[++i]);
                                                 break;
                                             case "-r":
-                                                msg.Retries = int.Parse(tokens[++i]);
+                                                msg.Options.Retries = int.Parse(tokens[++i]);
                                                 break;
                                         }
                                     }
-                                    handlers[msg.MessageType].Handle(msg, msg.Retries - 1);
+                                    handlers[msg.MessageType].Handle(msg);
                                     break;
                                 default:
                                     Console.WriteLine("Read Help!");
                                     break;
                             }
                         }
-                        //catch(Exception e)
-                        //{
-                        //    Console.WriteLine("Read Help!");
-                        //}
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("Read Help!");
+                        }
                     }
                 }
             }

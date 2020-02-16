@@ -40,7 +40,7 @@ namespace Eve.Scheduler.Controller.Server
                 var settings = _SocketsSettings[e.Receiver];
                 if (settings.WhiteList.Contains(message.MessageType))
                 {
-                    _Handlers[message.MessageType].Handle(message, message.Retries - 1);
+                    _Handlers[message.MessageType].Handle(message);
                 }
                 else
                 {

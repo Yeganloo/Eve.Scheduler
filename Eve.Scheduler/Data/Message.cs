@@ -5,23 +5,15 @@
         public string Identifier { get; set; }
 
         public string MessageType { get; set; }
-        /// <summary>
-        /// Unix Start Time. (Optional)
-        /// </summary>
-        public long? StartDateTime { get; set; }
-        /// <summary>
-        /// Unix End Time. (Optional)
-        /// </summary>
-        public long? ExpiresDateTime { get; set; }
 
-        public int Period { get; set; }
+        public MessageScheduleOptions Options { get; set; }
 
-        public int Retries { get; set; }
-
-        public int? Timeout { get; set; }
-
-        public byte Status { get; set; }
+        public MessageHeaders Headers { get; set; }
 
         public byte[] Payload { get; set; }
+
+        public byte[] Tag { get; set; }
+
+        public byte[] IV { get; set; }
     }
 }

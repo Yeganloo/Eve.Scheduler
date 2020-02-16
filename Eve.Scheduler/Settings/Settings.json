@@ -1,9 +1,12 @@
 {
+  "EncryptionKeis": {
+    "Default": "My Base64 Secret Key"
+  },
   "SocketSettings": [
     {
       "Name": "local_9090",
-      "WhiteList": [],
-      "Address": "127.0.0.1:9090"
+      "WhiteList": [ "ApiCaller" ],
+      "Address": "192.168.0.19:9090"
     }
   ],
   "Handlers": [
@@ -11,7 +14,6 @@
       "MessageType": "ApiCaller",
       "Type": "Eve.Scheduler.APICaller.APIHandler",
       "AssemblyName": "Eve.Scheduler.APICaller.dll"
-
     }
   ]
 }
